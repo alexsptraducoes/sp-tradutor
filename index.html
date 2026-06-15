@@ -2523,7 +2523,7 @@ async function callClaude(system, user, apiKey) {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         temperature: 0,
         system: system,
@@ -2976,7 +2976,7 @@ document.addEventListener('keydown', function(e) {
   }
 
   // Secret typing trigger — works even when no input is focused
-  if (e.key.length === 1) {
+  if (e.key && e.key.length === 1) {
     adminKeyBuffer += e.key.toLowerCase();
     if (adminKeyBuffer.length > 7) adminKeyBuffer = adminKeyBuffer.slice(-7);
     if (adminKeyBuffer === 'adminsp') {
@@ -3339,7 +3339,7 @@ Responda sempre em português do Brasil.`;
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
         temperature: 0,
         system: systemPrompt,
@@ -3366,7 +3366,7 @@ Responda sempre em português do Brasil.`;
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           max_tokens: 2000,
           temperature: 0,
           system: systemPrompt,
@@ -3803,7 +3803,7 @@ ${dataContext}`;
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
         temperature: 0,
         system: systemPrompt,
