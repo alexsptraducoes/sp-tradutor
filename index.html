@@ -839,6 +839,7 @@ tr:hover td { background: var(--gray-50); }
     <div style="max-width:1080px;margin:0 auto;padding:0 20px;display:flex;gap:0">
       <button class="app-nav-tab active" id="nav-docs" onclick="switchAppTab('docs')">📄 Documentos</button>
       <button class="app-nav-tab" id="nav-chat" onclick="switchAppTab('chat')">💬 Chat de Tradução</button>
+      <button class="app-nav-tab" id="nav-image" onclick="switchAppTab('image')">📷 Traduzir Imagem</button>
       <button class="app-nav-tab" id="nav-dashboard" onclick="switchAppTab('dashboard')" style="display:none">📊 Dashboard</button>
       <button class="app-nav-tab" id="nav-laudas" onclick="switchAppTab('laudas')" style="display:none">📋 Laudas</button>
       <button class="app-nav-tab" id="nav-admin-ai" onclick="switchAppTab('admin-ai')" style="display:none">🧠 IA Admin</button>
@@ -1546,6 +1547,126 @@ FROM auth.users WHERE email = '<a href="/cdn-cgi/l/email-protection" class="__cf
           </div>
         </div>
         <button class="btn btn-secondary" onclick="loadMyProduction()">↺ Filtrar</button>
+
+    </div>
+  </div>
+  </div>
+  </div>
+
+  <!-- IMAGE TRANSLATION PANEL -->
+  <div id="app-panel-image" style="display:none">
+  <div class="main-content">
+    <div class="section-header">
+      <h1 class="section-title">Traduzir Imagem</h1>
+      <p class="section-sub">Upload de foto ou PDF · OCR automático · Tradução com glossário · Resultado para copiar</p>
+    </div>
+
+    <!-- STEP 1: CONFIG -->
+    <div class="card" id="img-card-config">
+      <div class="card-title">⚙ Configuração da Tradução</div>
+      <div class="form-row">
+        <div>
+          <label>Idioma de Origem</label>
+          <select id="img-lang-from" onchange="updateImgLangOptions()">
+            <option value="pt">🇧🇷 Português (Brasil)</option>
+            <option value="ptpt">🇵🇹 Português (Portugal)</option>
+            <option value="en">🇺🇸 Inglês</option>
+            <option value="es">🇪🇸 Espanhol</option>
+            <option value="fr">🇫🇷 Francês</option>
+            <option value="it">🇮🇹 Italiano</option>
+          </select>
+        </div>
+        <div>
+          <label>Idioma de Destino</label>
+          <select id="img-lang-to">
+            <option value="en">🇺🇸 Inglês</option>
+            <option value="es">🇪🇸 Espanhol</option>
+            <option value="fr">🇫🇷 Francês</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="pt">🇧🇷 Português (Brasil)</option>
+            <option value="ptpt">🇵🇹 Português (Portugal)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Tipo de Documento</label>
+          <select id="img-doc-type">
+            <option value="Certidão">Certidão</option>
+            <option value="Contrato">Contrato</option>
+            <option value="Procuração">Procuração</option>
+            <option value="Sentença / Decisão Judicial">Sentença / Decisão Judicial</option>
+            <option value="Escritura Pública">Escritura Pública</option>
+            <option value="Diploma / Histórico Escolar">Diploma / Histórico Escolar</option>
+            <option value="Apostila de Haia">Apostila de Haia</option>
+            <option value="Outro Documento Jurídico">Outro Documento Jurídico</option>
+          </select>
+        </div>
+        <div>
+          <label>Glossário Ativo</label>
+          <div class="glossary-badge" id="img-glossary-badge" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:3px;font-size:13px;color:var(--gray-600)">
+            Selecione os idiomas
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Número de Referência <span style="color:var(--error)">*</span></label>
+        <div style="display:flex;align-items:center;gap:0">
+          <div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--gray-400);white-space:nowrap;padding:10px 14px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:3px 0 0 3px;border-right:none">REF</div>
+          <input type="text" id="img-reference" placeholder="00000"
+            style="border-radius:0 3px 3px 0;font-family:'DM Mono',monospace;letter-spacing:1px"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,5)"
+            maxlength="5">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gray-400);margin-top:5px">
+          Formato: REF 00000 · Campo obrigatório antes de traduzir
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: UPLOAD -->
+    <div class="card">
+      <div class="card-title">📷 Upload da Imagem ou PDF</div>
+      <div class="upload-area" id="img-upload-area" onclick="document.getElementById('img-file-input').click()"
+        ondragover="event.preventDefault()" ondrop="handleImgDrop(event)"
+        style="cursor:pointer;border:2px dashed var(--gray-200);border-radius:6px;padding:40px;text-align:center;transition:all 0.2s">
+        <input type="file" id="img-file-input" accept=".jpg,.jpeg,.png,.pdf" style="display:none" onchange="handleImgFile(event)">
+        <div style="font-size:48px;margin-bottom:12px">📷</div>
+        <div style="font-weight:600;color:var(--gray-800);margin-bottom:6px">Clique ou arraste a imagem aqui</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gray-400)">JPG · PNG · PDF com imagem · Máx. 20MB</div>
+      </div>
+      <div id="img-preview" style="display:none;margin-top:16px;text-align:center">
+        <img id="img-preview-img" style="max-width:100%;max-height:400px;border-radius:6px;border:1px solid var(--gray-200);display:none">
+        <div id="img-preview-name" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gray-600);margin-top:8px"></div>
+      </div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" id="img-btn-translate" onclick="translateImage()" style="display:none">
+          ⚡ Extrair Texto e Traduzir
+        </button>
+        <button class="btn btn-ghost" onclick="clearImgUpload()" id="img-btn-clear" style="display:none">Limpar</button>
+        <span id="img-status" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gray-400)"></span>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card" id="img-result-card" style="display:none">
+      <div class="card-title">✅ Texto Extraído e Traduzido</div>
+
+      <div style="margin-bottom:20px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gray-400);letter-spacing:1px;margin-bottom:8px">TEXTO ORIGINAL (EXTRAÍDO DA IMAGEM)</div>
+        <div id="img-original-text" style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:3px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto"></div>
+      </div>
+
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gray-400);letter-spacing:1px;margin-bottom:8px">TRADUÇÃO</div>
+        <div id="img-translated-text" style="background:var(--off-white);border:1px solid var(--gray-100);border-left:3px solid var(--success);border-radius:3px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto"></div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-secondary" onclick="imgCopyTranslation()">📋 Copiar Tradução</button>
+        <button class="btn btn-ghost" onclick="imgCopyOriginal()">📋 Copiar Original</button>
+      </div>
+    </div>
 
   </div>
   </div>
@@ -2688,7 +2809,7 @@ function switchAppTab(tab) {
   if (navEl) navEl.classList.add('active');
 
   // Hide all panels
-  ['docs','chat','dashboard','laudas','admin-ai','users','assistant','my-production'].forEach(p => {
+  ['docs','chat','dashboard','laudas','admin-ai','users','assistant','my-production','image'].forEach(p => {
     const el = document.getElementById('app-panel-' + p);
     if (el) el.style.display = 'none';
   });
@@ -4919,4 +5040,249 @@ window.addEventListener('load', function() {
   updateLangOptions();
   updateChatLangOptions();
 });
+
+// ════════════════════════════════════════════════════════════
+// IMAGE TRANSLATION
+// ════════════════════════════════════════════════════════════
+let imgFile = null;
+
+function updateImgLangOptions() {
+  const from = document.getElementById('img-lang-from').value;
+  const toLang = document.getElementById('img-lang-to');
+  const currentTo = toLang.value;
+  const validDests = VALID_PAIRS.filter(p => p[0] === from).map(p => p[1]);
+  toLang.innerHTML = '';
+  validDests.forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang;
+    opt.textContent = LANG_FLAGS[lang] + ' ' + LANG_NAMES[lang];
+    if (lang === currentTo && validDests.includes(currentTo)) opt.selected = true;
+    toLang.appendChild(opt);
+  });
+  // Update glossary badge
+  const badge = document.getElementById('img-glossary-badge');
+  const glossary = buildGlossaryBlock(from, toLang.value);
+  const count = (GLOSSARY_COUNTS || {})[from+'-'+toLang.value] || 0;
+  if (count > 0) {
+    badge.innerHTML = `<strong style="color:var(--success)">${count} termos</strong> para ${LANG_FLAGS[from]} ${LANG_NAMES[from]} → ${LANG_FLAGS[toLang.value]} ${LANG_NAMES[toLang.value]}`;
+  } else {
+    badge.textContent = 'Sem glossário para este par';
+  }
+}
+
+function handleImgDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) loadImgFile(file);
+}
+
+function handleImgFile(e) {
+  const file = e.target.files[0];
+  if (file) loadImgFile(file);
+}
+
+function loadImgFile(file) {
+  const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+  if (!validTypes.includes(file.type)) {
+    alert('Formato não suportado. Use JPG, PNG ou PDF.');
+    return;
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    alert('Arquivo muito grande. Máximo 20MB.');
+    return;
+  }
+
+  imgFile = file;
+  const preview = document.getElementById('img-preview');
+  const previewImg = document.getElementById('img-preview-img');
+  const previewName = document.getElementById('img-preview-name');
+
+  preview.style.display = 'block';
+  previewName.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+
+  if (file.type !== 'application/pdf') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImg.src = e.target.result;
+      previewImg.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    previewImg.style.display = 'none';
+    previewName.textContent = '📄 ' + file.name + ' (PDF com imagem)';
+  }
+
+  document.getElementById('img-btn-translate').style.display = 'inline-flex';
+  document.getElementById('img-btn-clear').style.display = 'inline-flex';
+  document.getElementById('img-upload-area').style.borderColor = 'var(--blue-light)';
+}
+
+function clearImgUpload() {
+  imgFile = null;
+  document.getElementById('img-file-input').value = '';
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('img-preview-img').style.display = 'none';
+  document.getElementById('img-btn-translate').style.display = 'none';
+  document.getElementById('img-btn-clear').style.display = 'none';
+  document.getElementById('img-result-card').style.display = 'none';
+  document.getElementById('img-status').textContent = '';
+  document.getElementById('img-upload-area').style.borderColor = 'var(--gray-200)';
+}
+
+async function translateImage() {
+  if (!imgFile) { alert('Selecione uma imagem primeiro.'); return; }
+
+  const apiKey = getApiKey();
+  if (!apiKey) { alert('Configure a chave API primeiro.'); return; }
+
+  const ref = document.getElementById('img-reference').value.trim();
+  if (!ref) {
+    document.getElementById('img-reference').focus();
+    document.getElementById('img-reference').style.borderColor = 'var(--error)';
+    alert('⚠ Preencha o Número de Referência antes de traduzir.');
+    return;
+  }
+  document.getElementById('img-reference').style.borderColor = '';
+
+  const langFrom = document.getElementById('img-lang-from').value;
+  const langTo = document.getElementById('img-lang-to').value;
+  const docType = document.getElementById('img-doc-type').value;
+  const langFromName = LANG_NAMES[langFrom];
+  const langToName = LANG_NAMES[langTo];
+
+  const btn = document.getElementById('img-btn-translate');
+  const status = document.getElementById('img-status');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Processando...';
+  status.textContent = 'Lendo imagem...';
+  status.style.color = 'var(--gray-400)';
+
+  try {
+    // Convert file to base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(imgFile);
+    });
+
+    const mediaType = imgFile.type === 'application/pdf' ? 'application/pdf' : imgFile.type;
+    const instrucoes = INSTRUCOES[langFrom+'-'+langTo] || INSTRUCOES['pt-en'];
+    const glossaryBlock = buildGlossaryBlock(langFrom, langTo);
+
+    // Step 1: Extract text from image
+    status.textContent = 'Extraindo texto da imagem...';
+    const extractResp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4000,
+        temperature: 0,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: mediaType === 'application/pdf' ? 'document' : 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64 }
+            },
+            {
+              type: 'text',
+              text: `Extraia TODO o texto visível neste documento, preservando a estrutura e formatação original. Retorne apenas o texto extraído, sem comentários ou explicações. Idioma do documento: ${langFromName}.`
+            }
+          ]
+        }]
+      })
+    });
+
+    const extractData = await extractResp.json();
+    if (!extractResp.ok) throw new Error(extractData.error?.message || 'Erro ao extrair texto');
+    const extractedText = extractData.content?.[0]?.text || '';
+
+    if (!extractedText.trim()) throw new Error('Não foi possível extrair texto da imagem.');
+
+    // Show original text
+    document.getElementById('img-original-text').textContent = extractedText;
+
+    // Step 2: Translate
+    status.textContent = 'Traduzindo...';
+    const system = `Você é um tradutor juramentado profissional.
+Tipo de documento: ${docType}
+Idioma de origem: ${langFromName} | Idioma de destino: ${langToName}
+
+=== INSTRUÇÕES OBRIGATÓRIAS ===
+${instrucoes}
+${glossaryBlock}
+
+Retorne APENAS a tradução completa, sem comentários ou explicações.`;
+
+    let translated = await callClaude(system, `Traduza o seguinte texto de ${langFromName} para ${langToName}:
+
+${extractedText}`, apiKey);
+
+    // Apply post-processing
+    if (langFrom === 'pt' && langTo === 'es') translated = applyPtEsTerminology(translated);
+    if (langTo === 'pt' || langTo === 'ptpt') translated = convertMonetaryFormatToPT(translated);
+    if (langTo === 'en') translated = convertMonetaryFormatToEN(translated);
+
+    document.getElementById('img-translated-text').textContent = translated;
+    document.getElementById('img-result-card').style.display = 'block';
+    document.getElementById('img-result-card').scrollIntoView({ behavior: 'smooth' });
+
+    // Count words and save to DB
+    const wordCount = translated.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const laudaCount = Math.round(wordCount / 180 * 100) / 100;
+
+    if (currentUser) {
+      await supa.from('translations').insert({
+        user_id: currentUser.id,
+        session_id: currentSessionId,
+        lang_from: langFrom,
+        lang_to: langTo,
+        doc_type: docType,
+        file_name: imgFile.name,
+        source: 'image',
+        word_count: wordCount,
+        lauda_count: laudaCount,
+        reference: 'REF ' + ref
+      });
+    }
+
+    status.textContent = `✓ Concluído · ${wordCount.toLocaleString('pt-BR')} palavras · ${laudaCount.toFixed(2)} laudas`;
+    status.style.color = 'var(--success)';
+
+  } catch(err) {
+    status.textContent = '⚠ ' + err.message;
+    status.style.color = 'var(--error)';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Extrair Texto e Traduzir';
+}
+
+function imgCopyTranslation() {
+  const text = document.getElementById('img-translated-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function imgCopyOriginal() {
+  const text = document.getElementById('img-original-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
 </script></body></html>
